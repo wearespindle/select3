@@ -131,18 +131,6 @@ class Select3 {
             this.options.title = this.$element.attr('title');
         }
 
-        //Expose public methods
-        this.val = Select3.prototype.val;
-        this.render = Select3.prototype.render;
-        this.refresh = Select3.prototype.refresh;
-        this.setStyle = Select3.prototype.setStyle;
-        this.selectAll = Select3.prototype.selectAll;
-        this.deselectAll = Select3.prototype.deselectAll;
-        this.destroy = Select3.prototype.destroy;
-        this.remove = Select3.prototype.remove;
-        this.show = Select3.prototype.show;
-        this.hide = Select3.prototype.hide;
-
         this.init();
     }
 
@@ -588,7 +576,7 @@ class Select3 {
     */
     setStyle(style, status) {
         if (this.$element.attr('class')) {
-            this.$newElement.addClass(this.$element.attr('class').replace(/selectpicker|mobile-device|bs-select-hidden|validate\[.*\]/gi, ''));
+            this.$newElement.addClass(this.$element.attr('class').replace(/select3|mobile-device|bs-select-hidden|validate\[.*\]/gi, ''));
         }
 
         let buttonClass = style ? style : this.options.style;
@@ -870,16 +858,18 @@ class Select3 {
             });
         };
 
+        // Append the Select3 container to the specified container and toggle the open class.
+        this.$bsContainer.appendTo(this.options.container).append(this.$menu);
+
         this.$button.on('click', (e) => {
-            var $target = $(e.currentTarget);
             if (this.isDisabled()) {
                 return;
             }
             getPlacement(this.$newElement);
-            this.$bsContainer.appendTo(this.options.container).toggleClass('open', !$target.hasClass('open')).append(this.$menu);
+            this.$bsContainer.toggleClass('open');
         });
 
-        $(window).on('resize scroll', () => {
+        $(window).off('resize scroll').on('resize scroll', () => {
             getPlacement(this.$newElement);
         });
 
@@ -887,6 +877,18 @@ class Select3 {
             this.$menu.data('height', this.$menu.height());
             this.$bsContainer.detach();
         });
+    }
+
+
+    /**
+     * Close an active select.
+     */
+    deactivate() {
+        if (this.$bsContainer) {
+            this.$bsContainer.removeClass('open');
+        }
+
+        $(this.$newElement).removeClass('open');
     }
 
 
@@ -1252,6 +1254,14 @@ class Select3 {
     }
 
 
+    /**
+     * Checks if the select3 is currently active.
+     */
+    isActive() {
+        return this.$newElement.hasClass('open');
+    }
+
+
     changeAll(status) {
         if (!this.multiple) return;
         if (typeof status === 'undefined') status = true;
@@ -1322,7 +1332,7 @@ class Select3 {
         if (_this.options.liveSearch) $parent = $target.parent().parent();
         if (_this.options.container) $parent = _this.$menu;
         let $items = $('[role=menu] li', $parent);
-        let isActive = _this.$newElement.hasClass('open');
+        let isActive = this.isActive();
 
         if (!isActive && (e.keyCode >= 48 && e.keyCode <= 57 || e.keyCode >= 96 && e.keyCode <= 105 || e.keyCode >= 65 && e.keyCode <= 90)) {
             if (!_this.options.container) {
@@ -1507,7 +1517,7 @@ class Select3 {
             this.$menu.remove();
         }
 
-        this.$element.off('.bs.select').removeData('selectpicker').removeClass('bs-select-hidden selectpicker');
+        this.$element.off('.bs.select').removeData('select3').removeClass('bs-select-hidden select3');
     }
 
 }
@@ -1578,13 +1588,13 @@ $.fn.select3 = function(option, event) {
     let chain = this.each(function(i, el) {
         let $el = $(el);
         if ($el.is('select')) {
-            let data = $el.data('selectpicker');
+            let data = $el.data('select3');
             let options = typeof _option === 'object' && _option;
 
             if (!data) {
                 let config = $.extend({}, Select3.DEFAULTS, $.fn.select3.defaults || {}, $el.data(), options);
                 config.template = $.extend({}, Select3.DEFAULTS.template, ($.fn.select3.defaults ? $.fn.select3.defaults.template : {}), $el.data().template, options.template);
-                $el.data('selectpicker', (data = new Select3(el, config, _event)));
+                $el.data('select3', (data = new Select3(el, config, _event)));
             } else if (options) {
                 for (let _i in options) {
                     if (options.hasOwnProperty(_i)) {
@@ -1616,3 +1626,9 @@ $(document).data('keycount', 0)
     .on('focusin.modal', '.bootstrap-select [data-toggle=dropdown], .bootstrap-select [role="menu"], .bs-searchbox input', (e) => {
         e.stopPropagation();
     });
+
+
+// For select3 elements with a container, check to see if it should be closed or not.
+$(document).on('click', (e) => {
+    $('select').select3('deactivate');
+});
