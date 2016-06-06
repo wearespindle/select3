@@ -745,7 +745,9 @@ class Select3 {
                     getWidth = $menu.width();
                 }
 
-                if (this.options.dropupAuto) {
+                if (this.options.dropupForce) {
+                    this.$newElement.addClass('dropup');
+                } else if (this.options.dropupAuto) {
                     this.$newElement.toggleClass('dropup', selectOffsetTop > selectOffsetBot && (menuHeight - menuExtras.vert) < getHeight);
                 }
 
@@ -1553,6 +1555,7 @@ Select3.DEFAULTS = {
     showIcon: true,
     showContent: true,
     dropupAuto: true,
+    dropupForce: false,
     header: false,
     liveSearch: false,
     liveSearchPlaceholder: null,
