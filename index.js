@@ -1334,7 +1334,7 @@ class Select3 {
         if (_this.options.liveSearch) $parent = $target.parent().parent();
         if (_this.options.container) $parent = _this.$menu;
         let $items = $('[role=menu] li', $parent);
-        let isActive = this.isActive();
+        let isActive = _this.isActive();
 
         if (!isActive && (e.keyCode >= 48 && e.keyCode <= 57 || e.keyCode >= 96 && e.keyCode <= 105 || e.keyCode >= 65 && e.keyCode <= 90)) {
             if (!_this.options.container) {
