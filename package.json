@@ -1,7 +1,7 @@
 {
     "name": "select3",
     "description": "ES2015/Browserify/Bootstrap-less fork of the excellent bootstrap-select widget.",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "homepage": "https://github.com/wearespindle/select3",
     "author": {
         "name": "Spindle",
@@ -27,10 +27,7 @@
     "analyze": true,
     "files": [
         "index.js",
-        "less/variables.less",
-        "less/select3.less",
-        "sass/variables.scss",
-        "sass/select3.scss",
+        "sass/*.scss",
         "LICENSE",
         "LICENSE.md"
     ],
