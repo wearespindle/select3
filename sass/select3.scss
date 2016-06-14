@@ -89,7 +89,7 @@ select.select3 {
             background: none;
 
             &:hover,&:active {
-                background: $select3-selected-background-color !important;
+                background: $select3-selected-background-color;
                 span.text {
                     color: $select3-selected-text-color;
                 }
@@ -97,7 +97,8 @@ select.select3 {
         }
 
         .divider {
-            border-bottom: 0px;
+            background: none;
+            border-top: 1px dashed $select3-divider-color;
             margin: 5px 0;
         }
 
