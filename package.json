@@ -1,7 +1,7 @@
 {
     "name": "select3",
     "description": "ES2015/Browserify/Bootstrap-less fork of the excellent bootstrap-select widget.",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "homepage": "https://github.com/wearespindle/select3",
     "author": {
         "name": "Spindle",
