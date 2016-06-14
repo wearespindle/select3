@@ -5,7 +5,7 @@
  * Copyright 2013-2015 bootstrap-select
  * Licensed under MIT (https://github.com/silviomoreto/bootstrap-select/blob/master/LICENSE)
  *
- * Select3 v0.1.0 (https://github.com/wearespindle/select3)
+ * Select3 (https://github.com/wearespindle/select3)
  * Licensed under MIT (https://github.com/wearespindle/select3/blob/master/LICENSE.md)
  */
 
@@ -256,7 +256,7 @@ class Select3 {
             '</button>' +
             '</div>' +
             '</div>' : '';
-        let drop = '<div class="btn-group bootstrap-select' + showTick + inputGroup + '">' +
+        let drop = '<div class="btn-group select3' + showTick + inputGroup + '">' +
             '<button type="button" class="' + this.options.styleBase + ' dropdown-toggle" data-toggle="dropdown"' + autofocus + '>' +
             '<span class="filter-option pull-left"></span>&nbsp;' +
             '<span class="bs-caret">' +
@@ -1217,7 +1217,7 @@ class Select3 {
                     if (!!$noResults.parent().length) {
                         $noResults.remove();
                     }
-                    $noResults.html(this.options.noneResultsText.replace('{0}', '"' + htmlEscape(this.$searchbox.val()) + '"')).show();
+                    $noResults.html(this.options.noneResultsText).show();
                     this.$menuInner.append($noResults);
                 } else if (!!$noResults.parent().length) {
                     $noResults.remove();
@@ -1528,7 +1528,7 @@ class Select3 {
 Select3.VERSION = '0.1.0';
 Select3.DEFAULTS = {
     noneSelectedText: 'Nothing selected',
-    noneResultsText: 'No results matched {0}',
+    noneResultsText: 'No results',
     countSelectedText: function(numSelected, numTotal) {
         return (numSelected === 1) ? '{0} item selected' : '{0} items selected';
     },
@@ -1625,8 +1625,8 @@ $.fn.select3 = function(option, event) {
 
 // Only bind the keydown event once; not for every instance.
 $(document).data('keycount', 0)
-    .on('keydown.bs.select', '.bootstrap-select [data-toggle=dropdown], .bootstrap-select [role="menu"], .bs-searchbox input', Select3.prototype.keydown)
-    .on('focusin.modal', '.bootstrap-select [data-toggle=dropdown], .bootstrap-select [role="menu"], .bs-searchbox input', (e) => {
+    .on('keydown.bs.select', '.select3 [data-toggle=dropdown], .select3 [role="menu"], .bs-searchbox input', Select3.prototype.keydown)
+    .on('focusin.modal', '.select3 [data-toggle=dropdown], .select3 [role="menu"], .bs-searchbox input', (e) => {
         e.stopPropagation();
     });
 

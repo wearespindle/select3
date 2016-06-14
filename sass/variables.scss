@@ -1,9 +1,8 @@
-$color-red-error: rgb(185, 74, 72);
-$color-grey-arrow: rgba(204, 204, 204, 0.2);
-
-$width-default: 220px; // 3 960px-grid columns
-
-$zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
-
-//** Placeholder text color
-$input-color-placeholder: #999;
+$select3-error-color: rgb(185, 74, 72) !default;
+$select3-arrow-color: #000 !default;
+$select3-arrow-open-color: #e94e1b !default;
+$select3-zindex-select-dropdown: 1060 !default;
+$select3-width-default: 220px !default;
+$select3-input-placeholder-color: #999 !default;
+$select3-selected-background-color: #e94e1b !default;
+$select3-selected-text-color: #fff !default;
