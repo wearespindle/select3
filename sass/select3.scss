@@ -5,11 +5,9 @@
     cursor: not-allowed;
 }
 
-
 select.select3 {
     display: none;
 }
-
 
 .select3 {
     width: 220px \0; /*IE9 and below*/
@@ -27,21 +25,21 @@ select.select3 {
     }
 
     > select {
-        position: absolute !important;
+        position: absolute;
         bottom: 0;
         left: 50%;
-        display: block !important;
-        width: 0.5px !important;
-        height: 100% !important;
-        padding: 0 !important;
-        opacity: 0 !important;
+        display: block;
+        width: 0.5px;
+        height: 100%;
+        padding: 0;
+        opacity: 0;
         border: none;
 
         &.mobile-device {
             top: 0;
             left: 0;
-            display: block !important;
-            width: 100% !important;
+            display: block;
+            width: 100%;
             z-index: 2;
         }
     }
@@ -49,11 +47,11 @@ select.select3 {
     // Error display
     .has-error & .dropdown-toggle,
     .error & .dropdown-toggle {
-        border-color:$select3-error-color;
+        border-color: $select3-error-color;
     }
 
     &.fit-width {
-        width: auto !important;
+        width: auto;
     }
 
     &:not([class*="col-"]):not([class*="form-control"]):not(.input-group-btn) {
@@ -61,11 +59,10 @@ select.select3 {
     }
 
     .dropdown-toggle:focus {
-        outline: thin dotted #333333;
+        outline: thin dotted #333;
         outline: 5px auto -webkit-focus-ring-color;
         outline-offset: -2px;
     }
-
 
     &.form-control {
         margin-bottom: 0;
@@ -80,7 +77,6 @@ select.select3 {
             z-index: auto;
         }
     }
-
 
     // The selectpicker components.
     &.btn-group {
@@ -297,6 +293,11 @@ select.select3 {
         }
 
         &.show-tick .dropdown-menu li {
+            margin-bottom: 0;
+
+            &:first-child {
+                border-bottom: 1px solid #fff;
+            }
 
             &.active, &.selected {
                 background: $select3-selected-background-color;
@@ -318,7 +319,7 @@ select.select3 {
             &.selected a span.check-mark {
                 position: absolute;
                 display: inline-block;
-                right: 15px;
+                right: 0;
                 margin-top: 5px;
             }
 
@@ -329,7 +330,6 @@ select.select3 {
 
 
         .bs-searchbox {
-
             // The input search element.
             .form-control {
                 display: block;
@@ -354,12 +354,8 @@ select.select3 {
             color: #777;
             font-size: 12px;
         }
-
-
     }
 }
-
-
 
 .bs-searchbox,
 .bs-actionsbox,
