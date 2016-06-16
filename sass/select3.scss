@@ -10,7 +10,7 @@ select.select3 {
 }
 
 .select3 {
-    width: 220px \0; /*IE9 and below*/
+    width: $select3-width-default;
 
     // The selectpicker button
     > .dropdown-toggle {
@@ -54,8 +54,8 @@ select.select3 {
         width: auto;
     }
 
-    &:not([class*="col-"]):not([class*="form-control"]):not(.input-group-btn) {
-        width: $select3-width-default;
+    &.input-block-level {
+        width: 100%;
     }
 
     .dropdown-toggle:focus {
@@ -356,6 +356,10 @@ select.select3 {
         }
     }
 }
+
+// .formfield-group.select-inline .btn-group.select3 {
+//     width: 60px !important;
+// }
 
 .bs-searchbox,
 .bs-actionsbox,
