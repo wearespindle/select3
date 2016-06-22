@@ -78,6 +78,10 @@ select.select3 {
         }
     }
 
+    &.field-is-inline {
+        display: inline;
+    }
+
     // The selectpicker components.
     &.btn-group {
 
@@ -162,6 +166,7 @@ select.select3 {
         &.disabled,
         > .disabled {
             @include cursor-disabled();
+            background-color: #eee;
             &:focus {
                 outline: none !important;
             }
@@ -297,6 +302,10 @@ select.select3 {
 
             &:first-child {
                 border-bottom: 1px solid #fff;
+            }
+
+            &:only-child {
+                border-bottom: none;
             }
 
             &.active, &.selected {
