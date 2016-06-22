@@ -1629,9 +1629,3 @@ $(document).data('keycount', 0)
     .on('focusin.modal', '.select3 [data-toggle=dropdown], .select3 [role="menu"], .bs-searchbox input', (e) => {
         e.stopPropagation();
     });
-
-
-// For select3 elements with a container, check to see if it should be closed or not.
-$(document).on('click', (e) => {
-    $('select').select3('deactivate');
-});
