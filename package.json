@@ -1,39 +1,38 @@
 {
-    "name": "select3",
-    "description": "ES2015/Browserify/Bootstrap-less fork of the excellent bootstrap-select widget.",
-    "version": "0.1.9",
-    "homepage": "https://github.com/wearespindle/select3",
-    "author": {
-        "name": "Spindle",
-        "url": "https://wearespindle.com"
-    },
-    "contributors": [
-      {
-        "name": "Jeroen van Veen",
-        "email": "jeroen@wearespindle.com"
-      }
-    ],
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/wearespindle/select3"
-    },
-    "bugs": {
-        "url": "https://github.com/wearespindle/select3/issues"
-    },
-    "license": "MIT",
-    "dependencies": {
-        "jquery": ">=1.8"
-    },
-    "analyze": true,
-    "files": [
-        "index.js",
-        "sass/*.scss",
-        "LICENSE",
-        "LICENSE.md"
-    ],
-    "keywords": [
-        "form",
-        "select",
-        "widget"
-    ]
+  "name": "select3",
+  "description": "ES2015/Browserify/Bootstrap-less fork of the excellent bootstrap-select widget. Depends on Jquery.",
+  "version": "0.1.9",
+  "license": "MIT",
+  "homepage": "https://github.com/wearespindle/select3",
+  "author": {
+    "name": "Spindle",
+    "url": "https://wearespindle.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wearespindle/select3"
+  },
+  "bugs": {
+    "url": "https://github.com/wearespindle/select3/issues"
+  },
+  "keywords": [
+    "form",
+    "select",
+    "widget"
+  ],
+  "files": [
+    "dist/*.js",
+    "sass/*.scss",
+    "LICENSE",
+    "LICENSE.md"
+  ],
+  "main": "dist/select3.js",
+  "scripts": {
+    "compile": "babel --presets es2015 -d dist/ src/",
+    "prepublish": "npm run compile"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.10.1",
+    "babel-preset-es2015": "^6.9.0"
+  }
 }
