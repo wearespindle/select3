@@ -327,6 +327,7 @@ class Select3 {
 
     createLi() {
         var _li = [];
+        var optgroupIndex = 0;
         var optID = 0;
         var titleOption = document.createElement('option');
         // increment liIndex whenever a new <li> element is created to ensure liObj is correct
@@ -340,11 +341,12 @@ class Select3 {
         * @param [optgroup]
         * @returns {string}
         */
-        var generateLI = function(content, index, classes, optgroup) {
+        var generateLI = function(content, index, classes, optgroup, _optgroupIndex) {
             return '<li' +
             ((typeof classes !== 'undefined' & classes !== '') ? ' class="' + classes + '"' : '') +
             ((typeof index !== 'undefined' & index !== null) ? ' data-original-index="' + index + '"' : '') +
-            ((typeof optgroup !== 'undefined' & optgroup !== null) ? 'data-optgroup="' + optgroup + '"' : '') +
+            ((typeof optgroup !== 'undefined' & optgroup !== null) ? ' data-optgroup="' + optgroup + '"' : '') +
+            ((typeof _optgroupIndex !== 'undefined' & _optgroupIndex !== null) ? ' data-optgroup-index="' + _optgroupIndex + '"' : '') +
             '>' + content + '</li>';
         };
 
@@ -437,7 +439,8 @@ class Select3 {
 
                 let optGroupClass = ' ' + $parent[0].className || '';
 
-                if ($target.index() === 0) { // Is it the first option of the optgroup?
+                if ($target[0] === $parent[0].firstElementChild) { // Is it the first option of the optgroup?
+                    optgroupIndex = 0;
                     optID += 1;
 
                     // Get the opt group label
@@ -460,7 +463,8 @@ class Select3 {
                     return;
                 }
 
-                _li.push(generateLI(generateA(text, 'opt ' + optionClass + optGroupClass, inline, tokens), index, '', optID));
+                _li.push(generateLI(generateA(text, 'opt ' + optionClass + optGroupClass, inline, tokens), index, '', optID, optgroupIndex));
+                optgroupIndex++;
             } else if ($target.data('divider') === true) {
                 _li.push(generateLI('', index, 'divider'));
             } else if ($target.data('hidden') === true) {
@@ -806,7 +810,7 @@ class Select3 {
             this.$searchbox.off('input.getSize propertychange.getSize').on('input.getSize propertychange.getSize', getSize);
             $window.off('resize.getSize scroll.getSize').on('resize.getSize scroll.getSize', getSize);
         } else if (this.options.size && this.options.size !== 'auto' && this.$lis.not(notDisabled).length > this.options.size) {
-            let optIndex = this.$lis.not('.divider').not(notDisabled).children().slice(0, this.options.size).last().parent().index();
+            let optIndex = this.$lis.not('.divider').not(notDisabled).children().slice(0, this.options.size).last().parent().data('optgroup-index');
             let divLength = this.$lis.slice(0, optIndex + 1).filter('.divider').length;
             menuHeight = liHeight * this.options.size + divLength * divHeight + menuPadding.vert;
 
@@ -1210,16 +1214,25 @@ class Select3 {
             e.stopPropagation();
         });
 
-        this.$searchbox.on('input propertychange', (e) => {
+        let debounceInterval = (this.findLis().length < 5000) ? 0 : 1000;
+        this.$searchbox.on('input propertychange', require('debounce')((e) => {
             if (this.$searchbox.val()) {
                 timeit('search');
-                let $searchBase = this.$lis.not('.is-hidden').removeClass('hidden').children('a');
-                if (this.options.liveSearchNormalize) {
-                    $searchBase = $searchBase.not(':a' + this._searchStyle() + '("' + normalizeToBase(this.$searchbox.val()) + '")');
-                } else {
-                    $searchBase = $searchBase.not(':' + this._searchStyle() + '("' + this.$searchbox.val() + '")');
-                }
-                $searchBase.parent().addClass('hidden');
+                let _this = this;
+                let $searchBase = this.$lis.not('.is-hidden').removeClass('hidden').filter(function(index) {
+                    var $li = $(this);
+
+                    // skip optgroup headers
+                    if ($li.is('.dropdown-header')) {
+                        return false;
+                    }
+
+                    if (_this.options.liveSearchNormalize) {
+                        return $li.not(':a' + _this._searchStyle() + '("' + normalizeToBase(_this.$searchbox.val()) + '")').length === 1;
+                    }
+                    return $li.not(':' + _this._searchStyle() + '("' + _this.$searchbox.val() + '")').length === 1;
+                });
+                $searchBase.addClass('hidden');
                 timeit('search');
 
                 this.$lis.filter('.dropdown-header').each((i, el) => {
@@ -1235,12 +1248,15 @@ class Select3 {
                 // hide divider if first or last visible, or if followed by another divider
                 $lisVisible.each(function(index) {
                     var $target = $(this);
-                    if ($target.hasClass('divider') && ($target.index() === $lisVisible.first().index() || $target.index() === $lisVisible.last().index() || $lisVisible.eq(index + 1).hasClass('divider'))) {
+                    if ($target.hasClass('divider') &&
+                            ($target.data('optgroup-index') === $lisVisible.first().data('optgroup-index') ||
+                             $target.data('optgroup-index') === $lisVisible.last().data('optgroup-index') ||
+                             $lisVisible.eq(index + 1).hasClass('divider'))) {
                         $target.addClass('hidden');
                     }
                 });
 
-                if (!this.$lis.not('.hidden, .no-results').length) {
+                if (!this.$lis.not('.hidden').not('.no-results').length) {
                     if (!!$noResults.parent().length) {
                         $noResults.remove();
                     }
@@ -1257,9 +1273,11 @@ class Select3 {
             }
 
             this.$lis.filter('.active').removeClass('active');
-            if (this.$searchbox.val()) this.$lis.not('.hidden, .divider, .dropdown-header').eq(0).addClass('active').children('a').focus();
+            timeit('post-search re-render'); // the selector is already optimized: 5000 -> 20 ms
+            if (this.$searchbox.val()) this.$lis.not('.hidden').not('.divider').not('.dropdown-header').eq(0).addClass('active').children('a').trigger('focus');
             $(e.currentTarget).focus();
-        });
+            timeit('post-search re-render');
+        }, debounceInterval));
     }
 
 
@@ -1400,11 +1418,11 @@ class Select3 {
 
         if (/(38|40)/.test(e.keyCode.toString(10))) {
             let index = $items.index($items.find('a').filter(':focus').parent());
-            let first = $items.filter(selector).first().index();
-            let last = $items.filter(selector).last().index();
-            let next = $items.eq(index).nextAll(selector).eq(0).index();
-            let prev = $items.eq(index).prevAll(selector).eq(0).index();
-            let nextPrev = $items.eq(next).prevAll(selector).eq(0).index();
+            let first = $items.filter(selector).first().data('optgroup-index');
+            let last = $items.filter(selector).last().data('optgroup-index');
+            let next = $items.eq(index).nextAll(selector).eq(0).data('optgroup-index');
+            let prev = $items.eq(index).prevAll(selector).eq(0).data('optgroup-index');
+            let nextPrev = $items.eq(next).prevAll(selector).eq(0).data('optgroup-index');
 
             if (_this.options.liveSearch) {
                 $items.each(function(i, el) {
@@ -1453,7 +1471,7 @@ class Select3 {
             $items.each(function(i, el) {
                 if (!$(el).hasClass('disabled')) {
                     if ($.trim($(el).children('a').text().toLowerCase()).substring(0, 1) === keyCodeMap[e.keyCode]) {
-                        keyIndex.push($(el).index());
+                        keyIndex.push($(el).data('optgroup-index'));
                     }
                 }
             });
