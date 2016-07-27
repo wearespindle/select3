@@ -9,6 +9,22 @@
  * Licensed under MIT (https://github.com/wearespindle/select3/blob/master/LICENSE.md)
  */
 
+var __timeits = {};
+function timeit(message) {
+    var now = Math.round(performance.now() * 100) / 100;
+    var delta, logMsg;
+    if (Object.keys(__timeits).indexOf(message) === -1) {
+        __timeits[message] = now;
+        console.log(message + ' at ' + now);
+        return;
+    }
+    delta = Math.round((now - __timeits[message]) * 100) / 100;
+    logMsg = message + ' at ' + now + ' took ' + delta;
+    console.log(logMsg);
+
+    delete __timeits[message];
+}
+
 
 $.fn.triggerNative = function(eventName) {
     var event;
@@ -137,6 +153,7 @@ class Select3 {
 
     init() {
         var id = this.$element.attr('id');
+        timeit('init ' + id);
         this.$element.addClass('bs-select-hidden');
 
         // store originalIndex (key) and newIndex (value) in this.liObj for fast accessibility
@@ -144,7 +161,10 @@ class Select3 {
         this.liObj = {};
         this.multiple = this.$element.prop('multiple');
         this.autofocus = this.$element.prop('autofocus');
+        timeit('createView');
         this.$newElement = this.createView();
+        timeit('createView');
+
         this.$element
         .after(this.$newElement)
         .appendTo(this.$newElement);
@@ -172,7 +192,9 @@ class Select3 {
 
         this.render();
         this.setStyle();
+        timeit('setWidth');
         this.setWidth();
+        timeit('setWidth');
 
         if (this.options.container) this.selectPosition();
 
@@ -221,6 +243,7 @@ class Select3 {
         setTimeout(() => {
             this.$element.trigger('loaded.bs.select');
         });
+        timeit('init ' + id);
     }
 
 
@@ -279,7 +302,9 @@ class Select3 {
 
     createView() {
         var $drop = this.createDropdown();
+        timeit('createLi');
         var li = this.createLi();
+        timeit('createLi');
         $drop.find('ul')[0].innerHTML = li;
         return $drop;
     }
@@ -1187,6 +1212,7 @@ class Select3 {
 
         this.$searchbox.on('input propertychange', (e) => {
             if (this.$searchbox.val()) {
+                timeit('search');
                 let $searchBase = this.$lis.not('.is-hidden').removeClass('hidden').children('a');
                 if (this.options.liveSearchNormalize) {
                     $searchBase = $searchBase.not(':a' + this._searchStyle() + '("' + normalizeToBase(this.$searchbox.val()) + '")');
@@ -1194,6 +1220,7 @@ class Select3 {
                     $searchBase = $searchBase.not(':' + this._searchStyle() + '("' + this.$searchbox.val() + '")');
                 }
                 $searchBase.parent().addClass('hidden');
+                timeit('search');
 
                 this.$lis.filter('.dropdown-header').each((i, el) => {
                     let optgroup = $(el).data('optgroup');
