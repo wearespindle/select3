@@ -9,6 +9,25 @@
  * Licensed under MIT (https://github.com/wearespindle/select3/blob/master/LICENSE.md)
  */
 
+let timeits = {};
+let debug;  // set in select3 constructor
+function timeit(message) {
+    if (!debug) return;
+
+    let now = Math.round(performance.now() * 100) / 100;
+    let delta, logMsg;
+    if (Object.keys(timeits).indexOf(message) === -1) {
+        timeits[message] = now;
+        console.log(message + ' at ' + now);
+        return;
+    }
+    delta = Math.round((now - timeits[message]) * 100) / 100;
+    logMsg = message + ' at ' + now + ' took ' + delta;
+    console.log(logMsg);
+
+    delete timeits[message];
+}
+
 
 $.fn.triggerNative = function(eventName) {
     var event;
@@ -125,6 +144,8 @@ class Select3 {
         this.$lis = null;
         this.options = options;
 
+        debug = options.debug || false;
+
         // If we have no title yet, try to pull it from the html title attribute (jQuery doesnt' pick it up as it's not a
         // data-attribute)
         if (this.options.title === null) {
@@ -137,6 +158,7 @@ class Select3 {
 
     init() {
         var id = this.$element.attr('id');
+        timeit('init ' + id);
         this.$element.addClass('bs-select-hidden');
 
         // store originalIndex (key) and newIndex (value) in this.liObj for fast accessibility
@@ -144,7 +166,10 @@ class Select3 {
         this.liObj = {};
         this.multiple = this.$element.prop('multiple');
         this.autofocus = this.$element.prop('autofocus');
+        timeit('createView');
         this.$newElement = this.createView();
+        timeit('createView');
+
         this.$element
         .after(this.$newElement)
         .appendTo(this.$newElement);
@@ -172,7 +197,9 @@ class Select3 {
 
         this.render();
         this.setStyle();
+        timeit('setWidth');
         this.setWidth();
+        timeit('setWidth');
 
         if (this.options.container) this.selectPosition();
 
@@ -221,6 +248,7 @@ class Select3 {
         setTimeout(() => {
             this.$element.trigger('loaded.bs.select');
         });
+        timeit('init ' + id);
     }
 
 
@@ -278,8 +306,10 @@ class Select3 {
 
 
     createView() {
-        var $drop = this.createDropdown();
-        var li = this.createLi();
+        let $drop = this.createDropdown();
+        timeit('createLi');
+        let li = this.createLi();
+        timeit('createLi');
         $drop.find('ul')[0].innerHTML = li;
         return $drop;
     }
@@ -302,6 +332,7 @@ class Select3 {
 
     createLi() {
         var _li = [];
+        var optgroupIndex = 0;
         var optID = 0;
         var titleOption = document.createElement('option');
         // increment liIndex whenever a new <li> element is created to ensure liObj is correct
@@ -315,11 +346,12 @@ class Select3 {
         * @param [optgroup]
         * @returns {string}
         */
-        var generateLI = function(content, index, classes, optgroup) {
+        var generateLI = function(content, index, classes, optgroup, _optgroupIndex) {
             return '<li' +
             ((typeof classes !== 'undefined' & classes !== '') ? ' class="' + classes + '"' : '') +
             ((typeof index !== 'undefined' & index !== null) ? ' data-original-index="' + index + '"' : '') +
-            ((typeof optgroup !== 'undefined' & optgroup !== null) ? 'data-optgroup="' + optgroup + '"' : '') +
+            ((typeof optgroup !== 'undefined' & optgroup !== null) ? ' data-optgroup="' + optgroup + '"' : '') +
+            ((typeof _optgroupIndex !== 'undefined' & _optgroupIndex !== null) ? ' data-optgroup-index="' + _optgroupIndex + '"' : '') +
             '>' + content + '</li>';
         };
 
@@ -412,7 +444,8 @@ class Select3 {
 
                 let optGroupClass = ' ' + $parent[0].className || '';
 
-                if ($target.index() === 0) { // Is it the first option of the optgroup?
+                if ($target[0] === $parent[0].firstElementChild) { // Is it the first option of the optgroup?
+                    optgroupIndex = 0;
                     optID += 1;
 
                     // Get the opt group label
@@ -435,7 +468,8 @@ class Select3 {
                     return;
                 }
 
-                _li.push(generateLI(generateA(text, 'opt ' + optionClass + optGroupClass, inline, tokens), index, '', optID));
+                _li.push(generateLI(generateA(text, 'opt ' + optionClass + optGroupClass, inline, tokens), index, '', optID, optgroupIndex));
+                optgroupIndex++;
             } else if ($target.data('divider') === true) {
                 _li.push(generateLI('', index, 'divider'));
             } else if ($target.data('hidden') === true) {
@@ -781,7 +815,7 @@ class Select3 {
             this.$searchbox.off('input.getSize propertychange.getSize').on('input.getSize propertychange.getSize', getSize);
             $window.off('resize.getSize scroll.getSize').on('resize.getSize scroll.getSize', getSize);
         } else if (this.options.size && this.options.size !== 'auto' && this.$lis.not(notDisabled).length > this.options.size) {
-            let optIndex = this.$lis.not('.divider').not(notDisabled).children().slice(0, this.options.size).last().parent().index();
+            let optIndex = this.$lis.not('.divider').not(notDisabled).children().slice(0, this.options.size).last().parent().data('optgroup-index');
             let divLength = this.$lis.slice(0, optIndex + 1).filter('.divider').length;
             menuHeight = liHeight * this.options.size + divLength * divHeight + menuPadding.vert;
 
@@ -1164,6 +1198,77 @@ class Select3 {
         });
     }
 
+    focusFirstLi(e) {
+        this.$lis.filter('.active').removeClass('active');
+        timeit('post-search re-render'); // the selector is already optimized: 5000 -> 20 ms
+        if (this.$searchbox.val()) {
+            this.$lis.not('.hidden').not('.divider').not('.dropdown-header').eq(0).addClass('active').children('a').trigger('focus');
+        }
+        $(e.currentTarget).focus();
+        timeit('post-search re-render');
+    }
+
+    hideEmptyOptgroups() {
+        this.$lis.filter('.dropdown-header').each((i, el) => {
+            let optgroup = $(el).data('optgroup');
+            if (this.$lis.filter('[data-optgroup=' + optgroup + ']').not(el).not('.hidden').length === 0) {
+                $(el).addClass('hidden');
+                this.$lis.filter('[data-optgroup=' + optgroup + 'div]').addClass('hidden');
+            }
+        });
+    }
+
+    hideDividers() {
+        let $lisVisible = this.$lis.not('.hidden');
+
+        // hide divider if first or last visible, or if followed by another divider
+        $lisVisible.each(function(index) {
+            var $target = $(this);
+            if ($target.hasClass('divider') &&
+                    ($target.data('optgroup-index') === $lisVisible.first().data('optgroup-index') ||
+                     $target.data('optgroup-index') === $lisVisible.last().data('optgroup-index') ||
+                     $lisVisible.eq(index + 1).hasClass('divider'))) {
+                $target.addClass('hidden');
+            }
+        });
+    }
+
+    toggleNoResults() {
+        let $noResults = $('<li class="no-results"></li>');
+
+        if (!this.$lis.not('.hidden').not('.no-results').length) {
+            if (!!$noResults.parent().length) {
+                $noResults.remove();
+            }
+            $noResults.html(this.options.noneResultsText).show();
+            this.$menuInner.append($noResults);
+        } else if (!!$noResults.parent().length) {
+            $noResults.remove();
+        }
+    }
+
+    hideNonMatchedLis($searchBase, chunkIndex, e) {
+        // add "hidden" class in chunks to unburden the main thread
+        let chunkSize = 500;  // random size
+        let maxChunks = Math.ceil($searchBase.length / chunkSize);
+        let chunkStart = chunkIndex * chunkSize;
+        let chunkStop = chunkStart + chunkSize;
+        let chunkElems = $searchBase.slice(chunkStart, chunkStop);
+        chunkElems.addClass('hidden');
+
+        if (chunkIndex === (maxChunks - 1)) {
+            timeit('apply-hidden');
+
+            this.hideEmptyOptgroups();
+            this.hideDividers();
+            this.toggleNoResults();
+            this.focusFirstLi(e);
+        } else {
+            this.hideLisTimeout = setTimeout(() => {
+                this.hideNonMatchedLis($searchBase, chunkIndex + 1, e);
+            }, 0); // push back execution to the end on the current event stack
+        }
+    }
 
     setLiveSearchListeners() {
         let $noResults = $('<li class="no-results"></li>');
@@ -1185,54 +1290,38 @@ class Select3 {
             e.stopPropagation();
         });
 
-        this.$searchbox.on('input propertychange', (e) => {
+        let debounceInterval = (this.findLis().length < 5000) ? 0 : 1000;
+        this.$searchbox.on('input propertychange', require('debounce')((e) => {
             if (this.$searchbox.val()) {
-                let $searchBase = this.$lis.not('.is-hidden').removeClass('hidden').children('a');
-                if (this.options.liveSearchNormalize) {
-                    $searchBase = $searchBase.not(':a' + this._searchStyle() + '("' + normalizeToBase(this.$searchbox.val()) + '")');
-                } else {
-                    $searchBase = $searchBase.not(':' + this._searchStyle() + '("' + this.$searchbox.val() + '")');
-                }
-                $searchBase.parent().addClass('hidden');
+                timeit('search');
+                let _this = this;
+                let $searchBase = this.$lis.not('.is-hidden').removeClass('hidden').filter(function(index) {
+                    var $li = $(this);
 
-                this.$lis.filter('.dropdown-header').each((i, el) => {
-                    let optgroup = $(el).data('optgroup');
-                    if (this.$lis.filter('[data-optgroup=' + optgroup + ']').not(el).not('.hidden').length === 0) {
-                        $(el).addClass('hidden');
-                        this.$lis.filter('[data-optgroup=' + optgroup + 'div]').addClass('hidden');
+                    // skip optgroup headers
+                    if ($li.is('.dropdown-header')) {
+                        return false;
                     }
+
+                    if (_this.options.liveSearchNormalize) {
+                        return $li.not(':a' + _this._searchStyle() + '("' + normalizeToBase(_this.$searchbox.val()) + '")').length === 1;
+                    }
+                    return $li.not(':' + _this._searchStyle() + '("' + _this.$searchbox.val() + '")').length === 1;
                 });
+                timeit('search');
 
-                let $lisVisible = this.$lis.not('.hidden');
-
-                // hide divider if first or last visible, or if followed by another divider
-                $lisVisible.each(function(index) {
-                    var $target = $(this);
-                    if ($target.hasClass('divider') && ($target.index() === $lisVisible.first().index() || $target.index() === $lisVisible.last().index() || $lisVisible.eq(index + 1).hasClass('divider'))) {
-                        $target.addClass('hidden');
-                    }
-                });
-
-                if (!this.$lis.not('.hidden, .no-results').length) {
-                    if (!!$noResults.parent().length) {
-                        $noResults.remove();
-                    }
-                    $noResults.html(this.options.noneResultsText).show();
-                    this.$menuInner.append($noResults);
-                } else if (!!$noResults.parent().length) {
-                    $noResults.remove();
-                }
+                timeit('apply-hidden');
+                clearTimeout(this.hideLisTimeout);
+                this.hideNonMatchedLis($searchBase, 0, e);
             } else {
                 this.$lis.not('.is-hidden').removeClass('hidden');
                 if (!!$noResults.parent().length) {
                     $noResults.remove();
                 }
-            }
 
-            this.$lis.filter('.active').removeClass('active');
-            if (this.$searchbox.val()) this.$lis.not('.hidden, .divider, .dropdown-header').eq(0).addClass('active').children('a').focus();
-            $(e.currentTarget).focus();
-        });
+                this.focusFirstLi(e);
+            }
+        }, debounceInterval));
     }
 
 
@@ -1373,11 +1462,11 @@ class Select3 {
 
         if (/(38|40)/.test(e.keyCode.toString(10))) {
             let index = $items.index($items.find('a').filter(':focus').parent());
-            let first = $items.filter(selector).first().index();
-            let last = $items.filter(selector).last().index();
-            let next = $items.eq(index).nextAll(selector).eq(0).index();
-            let prev = $items.eq(index).prevAll(selector).eq(0).index();
-            let nextPrev = $items.eq(next).prevAll(selector).eq(0).index();
+            let first = $items.filter(selector).first().data('optgroup-index');
+            let last = $items.filter(selector).last().data('optgroup-index');
+            let next = $items.eq(index).nextAll(selector).eq(0).data('optgroup-index');
+            let prev = $items.eq(index).prevAll(selector).eq(0).data('optgroup-index');
+            let nextPrev = $items.eq(next).prevAll(selector).eq(0).data('optgroup-index');
 
             if (_this.options.liveSearch) {
                 $items.each(function(i, el) {
@@ -1426,7 +1515,7 @@ class Select3 {
             $items.each(function(i, el) {
                 if (!$(el).hasClass('disabled')) {
                     if ($.trim($(el).children('a').text().toLowerCase()).substring(0, 1) === keyCodeMap[e.keyCode]) {
-                        keyIndex.push($(el).index());
+                        keyIndex.push($(el).data('optgroup-index'));
                     }
                 }
             });
