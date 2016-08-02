@@ -170,13 +170,12 @@ class Select3 {
         this.$newElement = this.createView();
         timeit('createView');
 
-        this.$element
-        .after(this.$newElement)
-        .appendTo(this.$newElement);
+        this.$element.after(this.$newElement);
         this.$button = this.$newElement.children('button');
         this.$menu = this.$newElement.children('.dropdown-menu');
         this.$menuInner = this.$menu.children('.inner');
         this.$searchbox = this.$menu.find('input');
+        this.$noResults = $('<li class="no-results"></li>');
 
         this.$element.removeClass('bs-select-hidden');
 
@@ -1234,16 +1233,14 @@ class Select3 {
     }
 
     toggleNoResults() {
-        let $noResults = $('<li class="no-results"></li>');
-
         if (!this.$lis.not('.hidden').not('.no-results').length) {
-            if (!!$noResults.parent().length) {
-                $noResults.remove();
+            if (!!this.$noResults.parent().length) {
+                this.$noResults.remove();
             }
-            $noResults.html(this.options.noneResultsText).show();
-            this.$menuInner.append($noResults);
-        } else if (!!$noResults.parent().length) {
-            $noResults.remove();
+            this.$noResults.html(this.options.noneResultsText).show();
+            this.$menuInner.append(this.$noResults);
+        } else if (!!this.$noResults.parent().length) {
+            this.$noResults.remove();
         }
     }
 
@@ -1271,14 +1268,12 @@ class Select3 {
     }
 
     setLiveSearchListeners() {
-        let $noResults = $('<li class="no-results"></li>');
-
         this.$button.on('click.dropdown.data-api touchstart.dropdown.data-api', () => {
             this.$menuInner.find('.active').removeClass('active');
             if (!!this.$searchbox.val()) {
                 this.$searchbox.val('');
                 this.$lis.not('.is-hidden').removeClass('hidden');
-                if (!!$noResults.parent().length) $noResults.remove();
+                if (!!this.$noResults.parent().length) this.$noResults.remove();
             }
             if (!this.multiple) this.$menuInner.find('.selected').addClass('active');
             setTimeout(() => {
@@ -1315,8 +1310,8 @@ class Select3 {
                 this.hideNonMatchedLis($searchBase, 0, e);
             } else {
                 this.$lis.not('.is-hidden').removeClass('hidden');
-                if (!!$noResults.parent().length) {
-                    $noResults.remove();
+                if (!!this.$noResults.parent().length) {
+                    this.$noResults.remove();
                 }
 
                 this.focusFirstLi(e);
