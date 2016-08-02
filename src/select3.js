@@ -170,9 +170,7 @@ class Select3 {
         this.$newElement = this.createView();
         timeit('createView');
 
-        this.$element
-        .after(this.$newElement)
-        .appendTo(this.$newElement);
+        this.$element.after(this.$newElement);
         this.$button = this.$newElement.children('button');
         this.$menu = this.$newElement.children('.dropdown-menu');
         this.$menuInner = this.$menu.children('.inner');
