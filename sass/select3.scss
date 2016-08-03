@@ -5,7 +5,8 @@
     cursor: not-allowed;
 }
 
-select.select3 {
+// Make the select3 quite specific.
+html body select.select3 {
     display: none;
 }
 
