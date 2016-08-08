@@ -10,11 +10,6 @@ html body select.select3 {
     display: none;
 }
 
-// TODO: Add select3 class to products-table.
-.products-table .django-formset.dynamic-form select {
-    display: none;
-}
-
 .select3 {
     width: $select3-width-default;
 
