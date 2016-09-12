@@ -1,14 +1,20 @@
 @import "variables";
 
 // Mixins
-@mixin cursor-disabled() {
+@mixin cursor-disabled {
     cursor: not-allowed;
 }
 
-// Make the select3 quite specific.
-html body select.select3 {
-    display: none;
+
+// Hide all select elements with a select3 class.
+html {
+    body {
+        .select3 {
+            display: none;
+        }
+    }
 }
+
 
 .select3 {
     width: $select3-width-default;
@@ -19,10 +25,14 @@ html body select.select3 {
         padding-right: 25px;
         z-index: 1;
 
-        &.bs-placeholder,
-        &.bs-placeholder:hover,
-        &.bs-placeholder:focus,
-        &.bs-placeholder:active { color: $select3-input-placeholder-color; }
+        &.bs-placeholder {
+            &:hover,
+            &:focus,
+            &:active {
+                color: $select3-input-placeholder-color;
+            }
+            color: $select3-input-placeholder-color;
+        }
     }
 
     > select {
@@ -34,7 +44,7 @@ html body select.select3 {
         height: 100%;
         padding: 0;
         opacity: 0;
-        border: none;
+        border: 0;
 
         &.mobile-device {
             top: 0;
@@ -59,16 +69,17 @@ html body select.select3 {
         width: 100%;
     }
 
-    .dropdown-toggle:focus {
-        outline: thin dotted #333;
-        outline: 5px auto -webkit-focus-ring-color;
-        outline-offset: -2px;
+    .dropdown-toggle {
+        &:focus {
+            outline: none;
+            border: 1px solid $select3-focus-color;
+        }
     }
 
     &.form-control {
         margin-bottom: 0;
         padding: 0;
-        border: none;
+        border: 0;
 
         &:not([class*="col-"]) {
             width: 100%;
@@ -86,13 +97,17 @@ html body select.select3 {
     // The selectpicker components.
     &.btn-group {
 
-        li a {
-            background: none;
+        li {
+            a {
+                background: none;
 
-            &:hover,&:active {
-                background: $select3-selected-background-color;
-                span.text {
-                    color: $select3-selected-text-color;
+                &:hover,
+                &:active {
+                    background: $select3-selected-background-color;
+
+                    .text {
+                        color: $select3-selected-text-color;
+                    }
                 }
             }
         }
@@ -103,7 +118,7 @@ html body select.select3 {
             margin: 5px 0;
         }
 
-        /** The select container */
+        // The select container.
         .btn-default {
             background: #fff;
 
@@ -117,31 +132,34 @@ html body select.select3 {
 
         .caret {
             border-top: 4px solid $select3-arrow-color;
-            border-bottom: 0px solid $select3-arrow-color;
+            border-bottom: 0;
         }
 
         &.open {
-            button.dropdown-toggle {
-                background: #fff;
+            .dropdown-toggle {
                 @include default-outline;
-                border-width:1px;
+                background: #fff;
+                border-width: 1px;
             }
 
             .caret {
-                border-top: 0px solid ;
+                border-top: 0;
                 border-bottom: 4px solid #000;
             }
         }
 
 
-        &:not(.input-group-btn), &[class*="col-"] {
+        &:not(.input-group-btn),
+        &[class*="col-"] {
             float: none;
             display: inline-block;
             margin-left: 0;
         }
 
         // Forces the pull to the right, if necessary.
-        &, &[class*="col-"], .row &[class*="col-"] {
+        &,
+        &[class*="col-"],
+        .row &[class*="col-"] {
             &.dropdown-menu-right {
                 float: right;
             }
@@ -166,10 +184,11 @@ html body select.select3 {
 
         &.disabled,
         > .disabled {
-            @include cursor-disabled();
+            @include cursor-disabled;
             background-color: #eee;
+
             &:focus {
-                outline: none !important;
+                outline: none;
             }
         }
 
@@ -199,8 +218,10 @@ html body select.select3 {
             }
         }
 
-        &[class*="col-"] .dropdown-toggle {
-            width: 100%;
+        &[class*="col-"] {
+            .dropdown-toggle {
+                width: 100%;
+            }
         }
 
         // The selectpicker dropdown
@@ -222,15 +243,20 @@ html body select.select3 {
             li {
                 position: relative;
 
-                &.active small {
-                    color: #fff;
+                &.active {
+                    small {
+                        color: #fff;
+                    }
                 }
 
-                &.disabled a {
-                    @include cursor-disabled();
+                &.disabled {
+                    a {
+                        @include cursor-disabled;
+                    }
                 }
 
                 a {
+                    line-height: 1.7rem;
                     cursor: pointer;
                     -webkit-user-select: none;
                     -moz-user-select: none;
@@ -244,11 +270,11 @@ html body select.select3 {
                         padding-left: 2.25em;
                     }
 
-                    span.check-mark {
+                    .check-mark {
                         display: none;
                     }
 
-                    span.text {
+                    .text {
                         display: inline-block;
                     }
 
@@ -286,65 +312,82 @@ html body select.select3 {
             white-space: nowrap;
         }
 
-        &.fit-width .dropdown-toggle {
-            .filter-option {
-                position: static;
-            }
+        &.fit-width {
+            .dropdown-toggle {
+                .filter-option {
+                    position: static;
+                }
 
-            .caret {
-                position: static;
-                top: auto;
-                margin-top: -1px;
+                .caret {
+                    position: static;
+                    top: auto;
+                    margin-top: -1px;
+                }
             }
         }
 
-        &.show-tick .dropdown-menu li {
-            margin-bottom: 0;
+        &.show-tick {
 
-            &:first-child {
-                border-bottom: 0;
-            }
+            .dropdown-menu {
+                li {
+                    margin-bottom: 0;
 
-            &:only-child {
-                border-bottom: none;
-            }
-
-            &.active, &.selected {
-                background: $select3-selected-background-color;
-                a {
-                    span.check-mark {
-                        margin-top: 0 !important;
+                    &:first-child {
+                        border-bottom: 0;
                     }
-                    span.check-mark, span.text {
-                        color: $select3-selected-text-color;
+
+                    &:only-child {
+                        border-bottom: 0;
                     }
-                    &:hover, &:active {
-                        span.text {
-                            color: $select3-selected-text-color;
+
+                    &.active,
+                    &.selected {
+                        background: $select3-selected-background-color;
+
+                        a {
+                            .check-mark {
+                                margin-top: 0;
+                            }
+
+                            .check-mark,
+                            .text {
+                                color: $select3-selected-text-color;
+                            }
+
+                            &:hover,
+                            &:active {
+                                .text {
+                                    color: $select3-selected-text-color;
+                                }
+                            }
+                        }
+                    }
+
+                    &.selected {
+                        a {
+                            .check-mark {
+                                position: absolute;
+                                display: inline-block;
+                                right: 0;
+                            }
+                        }
+                    }
+
+                    a {
+                        .text {
+                            margin-right: 34px;
                         }
                     }
                 }
             }
-
-            &.selected a span.check-mark {
-                position: absolute;
-                display: inline-block;
-                right: 0;
-                margin-top: 5px;
-            }
-
-            a span.text {
-                margin-right: 34px;
-            }
         }
-
 
         .bs-searchbox {
             // The input search element.
             .form-control {
+                @include border-box;
                 display: block;
                 height: 30px;
-                @include border-box();
             }
 
             & + .bs-actionsbox {
@@ -367,10 +410,6 @@ html body select.select3 {
     }
 }
 
-// .formfield-group.select-inline .btn-group.select3 {
-//     width: 60px !important;
-// }
-
 .bs-searchbox,
 .bs-actionsbox,
 .bs-donebutton {
@@ -381,8 +420,10 @@ html body select.select3 {
     width: 100%;
     box-sizing: border-box;
 
-    & .btn-group button {
-        width: 50%;
+    &.btn-group {
+        button {
+            width: 50%;
+        }
     }
 }
 
@@ -391,7 +432,9 @@ html body select.select3 {
     width: 100%;
     box-sizing: border-box;
 
-    & .btn-group button {
-        width: 100%;
+    &.btn-group {
+        button {
+            width: 100%;
+        }
     }
 }
