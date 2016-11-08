@@ -8,3 +8,28 @@ $select3-width-default: 220px !default;
 $select3-input-placeholder-color: #999 !default;
 $select3-selected-background-color: #e94e1b !default;
 $select3-selected-text-color: #fff !default;
+
+@mixin transition($property: all, $time: 0.25s) {
+    -webkit-transition: $property $time;
+    -moz-transition: $property $time;
+    -ms-transition: $property $time;
+    -o-transition: $property $time;
+    transition: $property $time;
+}
+
+@mixin default-outline {
+    @include transition(border, 0.25s);
+    @include transition(box-shadow, 0.25s);
+    outline-color: rgba(82, 168, 236, 0.4);
+    border-color: rgba(82, 168, 236, 0.8);
+    outline-style: none;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
+    -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
+}
+
+@mixin border-box {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}

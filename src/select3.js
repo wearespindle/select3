@@ -8,7 +8,6 @@
  * Select3 (https://github.com/wearespindle/select3)
  * Licensed under MIT (https://github.com/wearespindle/select3/blob/master/LICENSE.md)
  */
-
 let timeits = {};
 let debug;  // set in select3 constructor
 function timeit(message) {
@@ -27,30 +26,6 @@ function timeit(message) {
 
     delete timeits[message];
 }
-
-
-$.fn.triggerNative = function(eventName) {
-    var event;
-    var el = this[0];
-    if (el.dispatchEvent) {
-        if (typeof Event === 'function') {
-            // For modern browsers
-            event = new Event(eventName, {bubbles: true});
-        } else {
-            // For IE since it doesn't support Event constructor
-            event = document.createEvent('Event');
-            event.initEvent(eventName, true, false);
-        }
-        el.dispatchEvent(event);
-    } else {
-        if (el.fireEvent) {
-            event = document.createEventObject();
-            event.eventType = eventName;
-            el.fireEvent('on' + eventName, event);
-        }
-        this.trigger(eventName);
-    }
-};
 
 
 // Case insensitive contains search.
@@ -511,7 +486,8 @@ class Select3 {
         // End of this.$element.find('option')
 
 
-        //If we are not multiple, we don't have a selected item, and we don't have a title, select the first element so something is set in the button
+        //If we are not multiple, we don't have a selected item, and we don't have a title,
+        // select the first element so something is set in the button.
         if (!this.multiple && this.$element.find('option:selected').length === 0 && !this.options.title) {
             this.$element.find('option').eq(0).prop('selected', true).attr('selected', 'selected');
         }
@@ -1006,6 +982,113 @@ class Select3 {
     }
 
 
+    /**
+     * Handles the case when a user clicks an option in the rendered select3.
+     * @param {$.Event} $target - The Jquery selector for the related <option><a/> tag.
+     */
+    selectOption($target) {
+        let clickedIndex = $target.parent().data('originalIndex');
+        let prevValue = this.$element.val();
+        let prevIndex = this.$element.prop('selectedIndex');
+        let triggerChange = true;
+
+        //Don't run if we have been disabled
+        if (!this.isDisabled() && !$target.parent().hasClass('disabled')) {
+            let $options = this.$element.find('option');
+            let $option = $options.eq(clickedIndex);
+            let state = $option.prop('selected');
+            let $optgroup = $option.parent('optgroup');
+            let maxOptions = this.options.maxOptions;
+            let maxOptionsGrp = $optgroup.data('maxOptions') || false;
+
+            // Deselect all others if not multi select box
+            if (!this.multiple) {
+                $options.prop('selected', false);
+                $option.prop('selected', true);
+                this.$menuInner.find('.selected').removeClass('selected');
+                this.setSelected(clickedIndex, true);
+            } else {
+                // Toggle the one we have chosen if we are multi select.
+                $option.prop('selected', !state);
+                this.setSelected(clickedIndex, !state);
+                $target.blur();
+
+                if (maxOptions !== false || maxOptionsGrp !== false) {
+                    let maxReached = maxOptions < $options.filter(':selected').length;
+                    let maxReachedGrp = maxOptionsGrp < $optgroup.find('option:selected').length;
+
+                    if ((maxOptions && maxReached) || (maxOptionsGrp && maxReachedGrp)) {
+                        if (maxOptions && maxOptions === 1) {
+                            $options.prop('selected', false);
+                            $option.prop('selected', true);
+                            this.$menuInner.find('.selected').removeClass('selected');
+                            this.setSelected(clickedIndex, true);
+                        } else if (maxOptionsGrp && maxOptionsGrp === 1) {
+                            $optgroup.find('option:selected').prop('selected', false);
+                            $option.prop('selected', true);
+                            let optgroupID = $target.parent().data('optgroup');
+                            this.$menuInner.find('[data-optgroup="' + optgroupID + '"]').removeClass('selected');
+                            this.setSelected(clickedIndex, true);
+                        } else {
+                            let maxOptionsText = typeof this.options.maxOptionsText === 'string' ? [this.options.maxOptionsText, this.options.maxOptionsText] : this.options.maxOptionsText;
+                            let maxOptionsArr = typeof maxOptionsText === 'function' ? maxOptionsText(maxOptions, maxOptionsGrp) : maxOptionsText;
+                            let maxTxt = maxOptionsArr[0].replace('{n}', maxOptions);
+                            let maxTxtGrp = maxOptionsArr[1].replace('{n}', maxOptionsGrp);
+                            let $notify = $('<div class="notify"></div>');
+                            // If {var} is set in array, replace it
+                            /** @deprecated */
+                            if (maxOptionsArr[2]) {
+                                maxTxt = maxTxt.replace('{var}', maxOptionsArr[2][maxOptions > 1 ? 0 : 1]);
+                                maxTxtGrp = maxTxtGrp.replace('{var}', maxOptionsArr[2][maxOptionsGrp > 1 ? 0 : 1]);
+                            }
+
+                            $option.prop('selected', false);
+                            this.$menu.append($notify);
+
+                            if (maxOptions && maxReached) {
+                                $notify.append($('<div>' + maxTxt + '</div>'));
+                                triggerChange = false;
+                                this.$element.trigger('maxReached.bs.select');
+                            }
+
+                            if (maxOptionsGrp && maxReachedGrp) {
+                                $notify.append($('<div>' + maxTxtGrp + '</div>'));
+                                triggerChange = false;
+                                this.$element.trigger('maxReachedGrp.bs.select');
+                            }
+
+                            setTimeout(() => {
+                                this.setSelected(clickedIndex, false);
+                            }, 10);
+
+                            $notify.delay(750).fadeOut(300, function() {
+                                $(this).remove();
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (!this.multiple || (this.multiple && this.options.maxOptions === 1)) {
+                this.$button.focus();
+            } else if (this.options.liveSearch) {
+                this.$searchbox.focus();
+            }
+
+            // Trigger select 'change'
+            if (triggerChange) {
+                if ((prevValue !== this.$element.val() && this.multiple) || (prevIndex !== this.$element.prop('selectedIndex') && !this.multiple)) {
+                    // $option.prop('selected') is current option state (selected/unselected). The `state` is the
+                    // previous option state.
+                    this.$element.trigger('changed.bs.select', [clickedIndex, $option.prop('selected'), state]);
+                    this.$element.trigger('change', this);
+                    this.$element.trigger('item_clicked', this);
+                }
+            }
+        }
+    }
+
+
     setClickListeners() {
         let $document = $(document);
 
@@ -1040,109 +1123,17 @@ class Select3 {
         });
 
         this.$menuInner.on('click', 'li a', (e) => {
+            this.$element.trigger('before_change', e);
             let $target = $(e.currentTarget);
-            let clickedIndex = $target.parent().data('originalIndex');
-            let prevValue = this.$element.val();
-            let prevIndex = this.$element.prop('selectedIndex');
-            let triggerChange = true;
-
-            // Don't close on multi choice menu
+            // Allows to programmatically supress changing the selected item.
+            // Don't close when it's a multiple choice menu.
             if (this.multiple && this.options.maxOptions !== 1) {
                 e.stopPropagation();
             }
-
             e.preventDefault();
 
-            //Don't run if we have been disabled
-            if (!this.isDisabled() && !$target.parent().hasClass('disabled')) {
-                let $options = this.$element.find('option');
-                let $option = $options.eq(clickedIndex);
-                let state = $option.prop('selected');
-                let $optgroup = $option.parent('optgroup');
-                let maxOptions = this.options.maxOptions;
-                let maxOptionsGrp = $optgroup.data('maxOptions') || false;
-
-                // Deselect all others if not multi select box
-                if (!this.multiple) {
-                    $options.prop('selected', false);
-                    $option.prop('selected', true);
-                    this.$menuInner.find('.selected').removeClass('selected');
-                    this.setSelected(clickedIndex, true);
-                } else {
-                    // Toggle the one we have chosen if we are multi select.
-                    $option.prop('selected', !state);
-                    this.setSelected(clickedIndex, !state);
-                    $target.blur();
-
-                    if (maxOptions !== false || maxOptionsGrp !== false) {
-                        let maxReached = maxOptions < $options.filter(':selected').length;
-                        let maxReachedGrp = maxOptionsGrp < $optgroup.find('option:selected').length;
-
-                        if ((maxOptions && maxReached) || (maxOptionsGrp && maxReachedGrp)) {
-                            if (maxOptions && maxOptions === 1) {
-                                $options.prop('selected', false);
-                                $option.prop('selected', true);
-                                this.$menuInner.find('.selected').removeClass('selected');
-                                this.setSelected(clickedIndex, true);
-                            } else if (maxOptionsGrp && maxOptionsGrp === 1) {
-                                $optgroup.find('option:selected').prop('selected', false);
-                                $option.prop('selected', true);
-                                let optgroupID = $target.parent().data('optgroup');
-                                this.$menuInner.find('[data-optgroup="' + optgroupID + '"]').removeClass('selected');
-                                this.setSelected(clickedIndex, true);
-                            } else {
-                                let maxOptionsText = typeof this.options.maxOptionsText === 'string' ? [this.options.maxOptionsText, this.options.maxOptionsText] : this.options.maxOptionsText;
-                                let maxOptionsArr = typeof maxOptionsText === 'function' ? maxOptionsText(maxOptions, maxOptionsGrp) : maxOptionsText;
-                                let maxTxt = maxOptionsArr[0].replace('{n}', maxOptions);
-                                let maxTxtGrp = maxOptionsArr[1].replace('{n}', maxOptionsGrp);
-                                let $notify = $('<div class="notify"></div>');
-                                // If {var} is set in array, replace it
-                                /** @deprecated */
-                                if (maxOptionsArr[2]) {
-                                    maxTxt = maxTxt.replace('{var}', maxOptionsArr[2][maxOptions > 1 ? 0 : 1]);
-                                    maxTxtGrp = maxTxtGrp.replace('{var}', maxOptionsArr[2][maxOptionsGrp > 1 ? 0 : 1]);
-                                }
-
-                                $option.prop('selected', false);
-                                this.$menu.append($notify);
-
-                                if (maxOptions && maxReached) {
-                                    $notify.append($('<div>' + maxTxt + '</div>'));
-                                    triggerChange = false;
-                                    this.$element.trigger('maxReached.bs.select');
-                                }
-
-                                if (maxOptionsGrp && maxReachedGrp) {
-                                    $notify.append($('<div>' + maxTxtGrp + '</div>'));
-                                    triggerChange = false;
-                                    this.$element.trigger('maxReachedGrp.bs.select');
-                                }
-
-                                setTimeout(() => {
-                                    this.setSelected(clickedIndex, false);
-                                }, 10);
-
-                                $notify.delay(750).fadeOut(300, function() {
-                                    $(this).remove();
-                                });
-                            }
-                        }
-                    }
-                }
-
-                if (!this.multiple || (this.multiple && this.options.maxOptions === 1)) {
-                    this.$button.focus();
-                } else if (this.options.liveSearch) {
-                    this.$searchbox.focus();
-                }
-
-                // Trigger select 'change'
-                if (triggerChange) {
-                    if ((prevValue !== this.$element.val() && this.multiple) || (prevIndex !== this.$element.prop('selectedIndex') && !this.multiple)) {
-                        // $option.prop('selected') is current option state (selected/unselected). state is previous option state.
-                        this.$element.trigger('changed.bs.select', [clickedIndex, $option.prop('selected'), state]).triggerNative('change');
-                    }
-                }
+            if (!this.omitChange) {
+                this.selectOption($target);
             }
         });
 
@@ -1197,6 +1188,7 @@ class Select3 {
         });
     }
 
+
     focusFirstLi(e) {
         this.$lis.filter('.active').removeClass('active');
         timeit('post-search re-render'); // the selector is already optimized: 5000 -> 20 ms
@@ -1207,6 +1199,7 @@ class Select3 {
         timeit('post-search re-render');
     }
 
+
     hideEmptyOptgroups() {
         this.$lis.filter('.dropdown-header').each((i, el) => {
             let optgroup = $(el).data('optgroup');
@@ -1216,6 +1209,7 @@ class Select3 {
             }
         });
     }
+
 
     hideDividers() {
         let $lisVisible = this.$lis.not('.hidden');
@@ -1232,6 +1226,7 @@ class Select3 {
         });
     }
 
+
     toggleNoResults() {
         if (!this.$lis.not('.hidden').not('.no-results').length) {
             if (!!this.$noResults.parent().length) {
@@ -1243,6 +1238,7 @@ class Select3 {
             this.$noResults.remove();
         }
     }
+
 
     hideNonMatchedLis($searchBase, chunkIndex, e) {
         // add "hidden" class in chunks to unburden the main thread
@@ -1266,6 +1262,7 @@ class Select3 {
             }, 0); // push back execution to the end on the current event stack
         }
     }
+
 
     setLiveSearchListeners() {
         this.$button.on('click.dropdown.data-api touchstart.dropdown.data-api', () => {
@@ -1375,7 +1372,7 @@ class Select3 {
         $(selectedOptions).prop('selected', status);
         this.render(false);
         this.togglePlaceholder();
-        this.$element.trigger('changed.bs.select').triggerNative('change');
+        this.$element.trigger('change');
     }
 
 
