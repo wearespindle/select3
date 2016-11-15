@@ -16,22 +16,16 @@ html {
 }
 
 
+// The wrapper container.
 .select3 {
     width: $select3-width-default;
 
-    // The selectpicker button
+    // The select3 button that represents the original select.
     > .dropdown-toggle {
         width: 100%;
         padding-right: 25px;
         z-index: 1;
 
-        &.bs-placeholder {
-            &:hover,
-            &:focus,
-            &:active {
-                color: $select3-input-placeholder-color;
-            }
-        }
     }
 
     > select {
@@ -66,14 +60,6 @@ html {
 
     &.input-block-level {
         width: 100%;
-    }
-
-    .dropdown-toggle {
-        &:focus {
-            outline: thin dotted #333;
-            outline: 5px auto -webkit-focus-ring-color;
-            outline-offset: -2px;
-        }
     }
 
     &.form-control {
@@ -243,6 +229,14 @@ html {
             li {
                 position: relative;
 
+                &.active,
+                &.selected {
+                    background: $select3-selected-background-color;
+                    a {
+                        color: $select3-selected-text-color;
+                    }
+                }
+
                 &.active {
                     small {
                         color: #fff;
@@ -340,29 +334,7 @@ html {
                         border-bottom: 0;
                     }
 
-                    &.active,
-                    &.selected {
-                        background: $select3-selected-background-color;
-
-                        a {
-                            .check-mark {
-                                margin-top: 0;
-                            }
-
-                            .check-mark,
-                            .text {
-                                color: $select3-selected-text-color;
-                            }
-
-                            &:hover,
-                            &:active {
-                                .text {
-                                    color: $select3-selected-text-color;
-                                }
-                            }
-                        }
-                    }
-
+                    // Position the tickbox (based on Glyphicons).
                     &.selected {
                         a {
                             .check-mark {
@@ -372,18 +344,12 @@ html {
                             }
                         }
                     }
-
-                    a {
-                        .text {
-                            margin-right: 34px;
-                        }
-                    }
                 }
             }
         }
 
+        // This is livesearch input element.
         .bs-searchbox {
-            // The input search element.
             .form-control {
                 @include border-box;
                 display: block;
@@ -399,13 +365,6 @@ html {
                 width: 100%;
                 float: none;
             }
-        }
-
-        // Optgroup header styling.
-        .dropdown-header {
-            padding: 3px 20px;
-            color: #777;
-            font-size: 12px;
         }
     }
 }

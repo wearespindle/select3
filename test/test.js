@@ -19,9 +19,12 @@ $(() => {
         dropupAuto: false,
     });
 
+    $('.optgroups').select3({});
+
     $('.search').select3({
         liveSearch: true,
         actionsBox: true,
+        liveSearchPlaceholder: 'The answer is 42...',
         size: 5,
     });
 
@@ -33,5 +36,12 @@ $(() => {
     selectElement.on('before_change', (e) => {
         // Doesn't matter which item is clicked; always set the third item.
         select3.selectOption(select3.$menuInner.find('li:eq(2) a'));
+    });
+
+    $('.performance').select3({
+        liveSearch: true,
+        actionsBox: true,
+        liveSearchPlaceholder: 'The answer is 42...',
+        size: 5,
     });
 });

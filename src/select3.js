@@ -106,12 +106,7 @@ function htmlEscape(html) {
 
 class Select3 {
 
-    constructor(element, options, e) {
-        if (e) {
-            e.stopPropagation();
-            e.preventDefault();
-        }
-
+    constructor(element, options) {
         this.$element = $(element);
         this.$newElement = null;
         this.$button = null;
@@ -120,9 +115,8 @@ class Select3 {
         this.options = options;
 
         debug = options.debug || false;
-
-        // If we have no title yet, try to pull it from the html title attribute (jQuery doesnt' pick it up as it's not a
-        // data-attribute)
+        // Try to pull the title from the html title attribute, if we don't have
+        // it yet. Jquery doesn't pick it up as it's not a data-attribute.
         if (this.options.title === null) {
             this.options.title = this.$element.attr('title');
         }
@@ -132,10 +126,9 @@ class Select3 {
 
 
     init() {
-        var id = this.$element.attr('id');
+        let id = this.$element.attr('id');
         timeit('init ' + id);
-        this.$element.addClass('bs-select-hidden');
-
+        // this.$element.addClass('bs-select-hidden');
         // store originalIndex (key) and newIndex (value) in this.liObj for fast accessibility
         // allows us to do this.$lis.eq(this.liObj[index]) instead of this.$lis.filter('[data-original-index="' + index + '"]')
         this.liObj = {};
@@ -228,57 +221,54 @@ class Select3 {
 
     createDropdown() {
         // Options
-        // If we are multiple or showTick option is set, then add the show-tick class
+        // Add the show-tick class if we are multiple or showTick option is set.
         let showTick = (this.multiple || this.options.showTick) ? ' show-tick' : '';
         let inputGroup = this.$element.parent().hasClass('input-group') ? ' input-group-btn' : '';
+        let placeholderText = this.options.liveSearchPlaceholder === null ? '' : htmlEscape(this.options.liveSearchPlaceholder);
         let autofocus = this.autofocus ? ' autofocus' : '';
         // Elements
-        let header = this.options.header ? '<div class="popover-title"><button type="button" class="close" aria-hidden="true">&times;</button>' + this.options.header + '</div>' : '';
+        let header = this.options.header ?
+            `<div class="popover-title">
+                <button type="button" class="close">&times;</button>
+                ${this.options.header}
+            </div>` : '';
         let searchbox = this.options.liveSearch ?
-            '<div class="bs-searchbox">' +
-            '<input type="text" class="form-control" autocomplete="off"' +
-            (this.options.liveSearchPlaceholder === null ? '' : ' placeholder="' + htmlEscape(this.options.liveSearchPlaceholder) + '"') + '>' +
-            '</div>' : '';
+            `<div class="bs-searchbox">
+                <input type="text" class="form-control" autocomplete="off" placeholder="${placeholderText}">
+            </div>` : '';
         let actionsbox = this.multiple && this.options.actionsBox ?
-            '<div class="bs-actionsbox">' +
-            '<div class="btn-group btn-group-sm btn-block">' +
-            '<button type="button" class="actions-btn bs-select-all btn btn-default">' +
-            this.options.selectAllText +
-            '</button>' +
-            '<button type="button" class="actions-btn bs-deselect-all btn btn-default">' +
-            this.options.deselectAllText +
-            '</button>' +
-            '</div>' +
-            '</div>' : '';
+            `<div class="bs-actionsbox">
+                <div class="btn-group btn-group-sm btn-block">
+                    <button type="button" class="actions-btn bs-select-all btn btn-default">${this.options.selectAllText}</button>
+                    <button type="button" class="actions-btn bs-deselect-all btn btn-default">${this.options.deselectAllText}</button>
+                </div>
+            </div>` : '';
         let donebutton = this.multiple && this.options.doneButton ?
-            '<div class="bs-donebutton">' +
-            '<div class="btn-group btn-block">' +
-            '<button type="button" class="btn btn-sm btn-default">' +
-            this.options.doneButtonText +
-            '</button>' +
-            '</div>' +
-            '</div>' : '';
-        let drop = '<div class="btn-group select3' + showTick + inputGroup + '">' +
-            '<button type="button" class="' + this.options.styleBase + ' dropdown-toggle" data-toggle="dropdown"' + autofocus + '>' +
-            '<span class="filter-option pull-left"></span>&nbsp;' +
-            '<span class="bs-caret">' +
-            this.options.template.caret +
-            '</span>' +
-            '</button>' +
-            '<div class="dropdown-menu open">' +
-            header +
-            searchbox +
-            actionsbox +
-            '<ul class="dropdown-menu inner" role="menu">' +
-            '</ul>' +
-            donebutton +
-            '</div>' +
-            '</div>';
+            `<div class="bs-donebutton">
+                <div class="btn-group btn-block">
+                    <button type="button" class="btn btn-sm btn-default">${this.options.doneButtonText}</button>
+                </div>
+            </div>` : '';
+        let drop =
+            `<div class="btn-group select3 ${showTick} ${inputGroup}">
+                <button type="button" class="${this.options.styleBase} dropdown-toggle" data-toggle="dropdown"${autofocus}>
+                    <span class="filter-option pull-left"></span>&nbsp;
+                    <span class="bs-caret">${this.options.template.caret}</span>
+                </button>
+                <div class="dropdown-menu open">
+                    ${header}${searchbox}${actionsbox}
+                    <ul class="dropdown-menu inner" role="menu"></ul>
+                    ${donebutton}
+                </div>
+            </div>`;
 
         return $(drop);
     }
 
 
+    /**
+     * Generate the dropdown with options.
+     */
     createView() {
         let $drop = this.createDropdown();
         timeit('createLi');
@@ -290,17 +280,10 @@ class Select3 {
 
 
     reloadLi() {
-        var li;
-        //Remove all children.
-        this.destroyLi();
-        //Rebuild.
-        li = this.createLi();
-        this.$menuInner[0].innerHTML = li;
-    }
-
-
-    destroyLi() {
+        //Remove all list items.
         this.$menu.find('li').remove();
+        // Rebuild list items.
+        this.$menuInner[0].innerHTML = this.createLi();
     }
 
 
@@ -527,19 +510,17 @@ class Select3 {
 
                 let $el = $(el);
                 let icon = $el.data('icon') && this.options.showIcon ? '<i class="' + this.options.iconBase + ' ' + $el.data('icon') + '"></i> ' : '';
-                let subtext;
+                let subtext = '';
 
                 if (this.options.showSubtext && $el.data('subtext') && !this.multiple) {
-                    subtext = ' <small class="text-muted">' + $el.data('subtext') + '</small>';
-                } else {
-                    subtext = '';
+                    subtext = ` <small class="text-muted">${$el.data('subtext')}</small>`;
                 }
                 if (typeof $el.attr('title') !== 'undefined') {
                     return $el.attr('title');
                 } else if ($el.data('content') && this.options.showContent) {
                     return $el.data('content');
                 }
-                return icon + $el.html() + subtext;
+                return `${icon}${$el.html()}${subtext}`;
             }
             return null;
         }).toArray();
@@ -1659,26 +1640,21 @@ Select3.DEFAULTS = {
 /**
  * Select3 plugin definition
  */
-$.fn.select3 = function(option, event) {
+$.fn.select3 = function(option) {
     // get the args of the outer function..
     let args = arguments;
-    // The arguments of the function are explicitly re-defined from the argument list,
-    // because the shift causes them to get lost/corrupted in android 2.3 and IE9 #715 #775
-    let _option = option;
-    let _event = event;
-
     [].shift.apply(args);
     let value;
     let chain = this.each(function(i, el) {
         let $el = $(el);
         if ($el.is('select')) {
             let data = $el.data('select3');
-            let options = typeof _option === 'object' && _option;
+            let options = typeof option === 'object' && option;
 
             if (!data) {
                 let config = $.extend({}, Select3.DEFAULTS, $.fn.select3.defaults || {}, $el.data(), options);
                 config.template = $.extend({}, Select3.DEFAULTS.template, ($.fn.select3.defaults ? $.fn.select3.defaults.template : {}), $el.data().template, options.template);
-                $el.data('select3', (data = new Select3(el, config, _event)));
+                $el.data('select3', (data = new Select3(el, config)));
             } else if (options) {
                 for (let _i in options) {
                     if (options.hasOwnProperty(_i)) {
