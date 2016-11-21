@@ -1123,8 +1123,8 @@ class Select3 {
         });
 
         this.$menuInner.on('click', 'li a', (e) => {
-            this.$element.trigger('before_change', e);
             let $target = $(e.currentTarget);
+            this.$element.trigger('before_change', $target);
             // Allows to programmatically supress changing the selected item.
             // Don't close when it's a multiple choice menu.
             if (this.multiple && this.options.maxOptions !== 1) {
