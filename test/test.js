@@ -32,6 +32,6 @@ $(() => {
     select3.omitChange = true;
     selectElement.on('before_change', (e, clickedElement) => {
         // Doesn't matter which item is clicked; always set the third item.
-        select3.selectOption(select3.$menuInner.find('li:eq(2) a'));
+        select3.selectOption($(clickedElement));
     });
 });
