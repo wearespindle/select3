@@ -1403,6 +1403,9 @@ class Select3 {
         // This is the current instance.
         let _this = $parent.data('this');
 
+        // Don't process the event if the element is disabled.
+        if (_this.isDisabled()) return;
+
         let selector = ':not(.disabled, .hidden, .dropdown-header, .divider)';
         let keyCodeMap = {
             32: ' ', 48: '0', 49: '1', 50: '2', 51: '3', 52: '4', 53: '5', 54: '6', 55: '7', 56: '8', 57: '9', 59: ';',
