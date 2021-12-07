@@ -381,6 +381,7 @@ class Select3 {
             let optionClass = el.className || '';
             let inline = el.style.cssText;
             let text = $target.data('content') ? $target.data('content') : $target.html();
+            let tooltip = '';
             let tokens = $target.data('tokens') ? $target.data('tokens') : null;
             let subtext = typeof $target.data('subtext') !== 'undefined' ? '<small class="text-muted">' + $target.data('subtext') + '</small>' : '';
             let icon = typeof $target.data('icon') !== 'undefined' ? '<span class="' + this.options.iconBase + ' ' + $target.data('icon') + '"></span> ' : '';
@@ -400,7 +401,10 @@ class Select3 {
 
             if (!$target.data('content')) {
                 // Prepend any icon and append any subtext to the main text.
-                text = icon + '<span class="text">' + text + subtext + '</span>';
+                if (this.options.tooltips) {
+                    tooltip = 'title="' + text + subtext + '"';
+                }
+                text = icon + '<span class="text" ' + tooltip + '>' + text + subtext + '</span>';
             }
 
             if (isOptgroup && $target.data('divider') !== true) {
@@ -1656,6 +1660,7 @@ Select3.DEFAULTS = {
     mobile: false,
     selectOnTab: false,
     dropdownAlignRight: false,
+    tooltips: false,
 };
 
 
