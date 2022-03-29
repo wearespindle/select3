@@ -158,7 +158,7 @@ class Select3 {
 
         if (typeof id !== 'undefined') {
             this.$button.attr('data-id', id);
-            $('label[for="' + id + '"]').click((e) => {
+            $('label[for="' + id + '"]').on('click', (e) => {
                 e.preventDefault();
                 this.$button.focus();
             });
@@ -963,7 +963,7 @@ class Select3 {
             }
         }
 
-        this.$button.click(() => {
+        this.$button.on('click', () => {
             return !this.isDisabled();
         });
     }
@@ -1163,7 +1163,7 @@ class Select3 {
         });
 
         this.$menu.on('click', '.popover-title .close', () => {
-            this.$button.click();
+            this.$button.on('click', );
         });
 
         this.$searchbox.on('click', (e) => {
@@ -1187,7 +1187,7 @@ class Select3 {
             }
         });
 
-        this.$element.change(() => {
+        this.$element.on('change', () => {
             this.render(false);
         });
     }
@@ -1541,7 +1541,7 @@ class Select3 {
             if (!/(32)/.test(e.keyCode.toString(10))) e.preventDefault();
             if (!_this.options.liveSearch) {
                 let elem = $(':focus');
-                elem.click();
+                elem.on('click', );
                 // Bring back focus for multiselects
                 elem.focus();
                 // Prevent screen from scrolling if the user hit the spacebar
@@ -1549,7 +1549,7 @@ class Select3 {
                 // Fixes spacebar selection of dropdown items in FF & IE
                 $(document).data('spaceSelect', true);
             } else if (!/(32)/.test(e.keyCode.toString(10))) {
-                _this.$menuInner.find('.active a').click();
+                _this.$menuInner.find('.active a').on('click', );
                 $target.focus();
             }
             $(document).data('keycount', 0);
