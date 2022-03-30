@@ -1015,7 +1015,7 @@ class Select3 {
                 // Toggle the one we have chosen if we are multi select.
                 $option.prop('selected', !state);
                 this.setSelected(clickedIndex, !state);
-                $target.blur();
+                $target.trigger('blur');
 
                 if (maxOptions !== false || maxOptionsGrp !== false) {
                     let maxReached = maxOptions < $options.filter(':selected').length;
