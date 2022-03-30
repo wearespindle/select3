@@ -160,7 +160,7 @@ class Select3 {
             this.$button.attr('data-id', id);
             $('label[for="' + id + '"]').on('click', (e) => {
                 e.preventDefault();
-                this.$button.focus();
+                this.$button.trigger('focus');
             });
         }
 
@@ -199,10 +199,10 @@ class Select3 {
         let _this = this;
         if (this.$element[0].hasAttribute('required')) {
             this.$element.on('invalid', () => {
-                this.$button.addClass('bs-invalid').focus();
+                this.$button.addClass('bs-invalid').trigger('focus');
                 this.$element.on({
                     'focus.bs.select': () => {
-                        this.$button.focus();
+                        this.$button.trigger('focus');
                         this.$element.off('focus.bs.select');
                     },
                     'shown.bs.select': () => {
@@ -577,7 +577,7 @@ class Select3 {
         }
 
         //strip all html-tags and trim the result
-        this.$button.attr('title', $.trim(title.replace(/<[^>]*>?/g, '')));
+        this.$button.attr('title', title.replace(/<[^>]*>?/g, '').trim());
         this.$button.children('.filter-option').html(title);
         this.$element.trigger('rendered.bs.select');
     }
@@ -1074,9 +1074,9 @@ class Select3 {
             }
 
             if (!this.multiple || (this.multiple && this.options.maxOptions === 1)) {
-                this.$button.focus();
+                this.$button.trigger('focus');
             } else if (this.options.liveSearch) {
-                this.$searchbox.focus();
+                this.$searchbox.trigger('focus');
             }
 
             // Trigger select 'change'
@@ -1113,7 +1113,7 @@ class Select3 {
 
         this.$element.on('shown.bs.select', () => {
             if (!this.options.liveSearch && !this.multiple) {
-                this.$menuInner.find('.selected a').focus();
+                this.$menuInner.find('.selected a').trigger('focus');
             } else if (!this.multiple) {
                 let selectedIndex = this.liObj[this.$element[0].selectedIndex];
 
@@ -1146,9 +1146,9 @@ class Select3 {
             e.preventDefault();
             e.stopPropagation();
             if (this.options.liveSearch && !$(e.target).hasClass('close')) {
-                this.$searchbox.focus();
+                this.$searchbox.trigger('focus');
             } else {
-                this.$button.focus();
+                this.$button.trigger('focus');
             }
         });
 
@@ -1156,9 +1156,9 @@ class Select3 {
             e.preventDefault();
             e.stopPropagation();
             if (this.options.liveSearch) {
-                this.$searchbox.focus();
+                this.$searchbox.trigger('focus');
             } else {
-                this.$button.focus();
+                this.$button.trigger('focus');
             }
         });
 
@@ -1172,9 +1172,9 @@ class Select3 {
 
         this.$menu.on('click', '.actions-btn', (e) => {
             if (this.options.liveSearch) {
-                this.$searchbox.focus();
+                this.$searchbox.trigger('focus');
             } else {
-                this.$button.focus();
+                this.$button.trigger('focus');
             }
 
             e.preventDefault();
@@ -1199,7 +1199,7 @@ class Select3 {
         if (this.$searchbox.val()) {
             this.$lis.not('.hidden').not('.divider').not('.dropdown-header').eq(0).addClass('active').children('a').trigger('focus');
         }
-        $(e.currentTarget).focus();
+        $(e.currentTarget).trigger('focus');
         timeit('post-search re-render');
     }
 
@@ -1278,7 +1278,7 @@ class Select3 {
             }
             if (!this.multiple) this.$menuInner.find('.selected').addClass('active');
             setTimeout(() => {
-                this.$searchbox.focus();
+                this.$searchbox.trigger('focus');
             }, 10);
         });
 
@@ -1432,7 +1432,7 @@ class Select3 {
             } else {
                 _this.$button.trigger('click');
             }
-            _this.$searchbox.focus();
+            _this.$searchbox.trigger('focus');
             return;
         }
 
@@ -1441,7 +1441,7 @@ class Select3 {
                 e.preventDefault();
                 _this.$menu.parent().removeClass('open');
                 if (_this.options.container) _this.$newElement.removeClass('open');
-                _this.$button.focus();
+                _this.$button.trigger('focus');
             }
             // $items contains li elements when liveSearch is enabled
             $items = $('[role=menu] li' + selector, $parent);
@@ -1499,12 +1499,12 @@ class Select3 {
             $target.data('prevIndex', index);
 
             if (!_this.options.liveSearch) {
-                $items.eq(index).children('a').focus();
+                $items.eq(index).children('a').trigger('focus');
             } else {
                 e.preventDefault();
                 if (!$target.hasClass('dropdown-toggle')) {
-                    $items.removeClass('active').eq(index).addClass('active').children('a').focus();
-                    $target.focus();
+                    $items.removeClass('active').eq(index).addClass('active').children('a').trigger('focus');
+                    $target.trigger('focus');
                 }
             }
         } else if (!$target.is('input')) {
@@ -1513,7 +1513,7 @@ class Select3 {
 
             $items.each(function(i, el) {
                 if (!$(el).hasClass('disabled')) {
-                    if ($.trim($(el).children('a').text().toLowerCase()).substring(0, 1) === keyCodeMap[e.keyCode]) {
+                    if ($(el).children('a').text().toLowerCase().trim().substring(0, 1) === keyCodeMap[e.keyCode]) {
                         keyIndex.push($(el).data('optgroup-index'));
                     }
                 }
@@ -1523,7 +1523,7 @@ class Select3 {
             count++;
             $(document).data('keycount', count);
 
-            prevKey = $.trim($(':focus').text().toLowerCase()).substring(0, 1);
+            prevKey = $(':focus').text().toLowerCase().trim().substring(0, 1);
 
             if (prevKey !== keyCodeMap[e.keyCode]) {
                 count = 1;
@@ -1533,7 +1533,7 @@ class Select3 {
                 if (count > keyIndex.length) count = 1;
             }
 
-            $items.eq(keyIndex[count - 1]).children('a').focus();
+            $items.eq(keyIndex[count - 1]).children('a').trigger('focus');
         }
 
         // Select focused option if "Enter", "Spacebar" or "Tab" (when selectOnTab is true) are pressed inside the menu.
@@ -1543,14 +1543,14 @@ class Select3 {
                 let elem = $(':focus');
                 elem.on('click', );
                 // Bring back focus for multiselects
-                elem.focus();
+                elem.trigger('focus');
                 // Prevent screen from scrolling if the user hit the spacebar
                 e.preventDefault();
                 // Fixes spacebar selection of dropdown items in FF & IE
                 $(document).data('spaceSelect', true);
             } else if (!/(32)/.test(e.keyCode.toString(10))) {
                 _this.$menuInner.find('.active a').on('click', );
-                $target.focus();
+                $target.trigger('focus');
             }
             $(document).data('keycount', 0);
         }
@@ -1558,7 +1558,7 @@ class Select3 {
         if ((/(^9$|27)/.test(e.keyCode.toString(10)) && isActive && (_this.multiple || _this.options.liveSearch)) || (/(27)/.test(e.keyCode.toString(10)) && !isActive)) {
             _this.$menu.parent().removeClass('open');
             if (_this.options.container) _this.$newElement.removeClass('open');
-            _this.$button.focus();
+            _this.$button.trigger('focus');
         }
     }
 
