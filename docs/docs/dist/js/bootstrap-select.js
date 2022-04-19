@@ -370,7 +370,7 @@
         this.$button.attr('data-id', id);
         $('label[for="' + id + '"]').click(function (e) {
           e.preventDefault();
-          that.$button.focus();
+          that.$button.trigger('focus');
         });
       }
 
@@ -404,11 +404,11 @@
         this.$element.on('invalid', function () {
           that.$button
             .addClass('bs-invalid')
-            .focus();
+            .trigger('focus');
           
           that.$element.on({
             'focus.bs.select': function () {
-              that.$button.focus();
+              that.$button.trigger('focus');
               that.$element.off('focus.bs.select');
             },
             'shown.bs.select': function () {
@@ -1091,7 +1091,7 @@
 
       this.$element.on('shown.bs.select', function () {
         if (!that.options.liveSearch && !that.multiple) {
-          that.$menuInner.find('.selected a').focus();
+          that.$menuInner.find('.selected a').trigger('focus');
         } else if (!that.multiple) {
           var selectedIndex = that.liObj[that.$element[0].selectedIndex];
 
@@ -1192,9 +1192,9 @@
           }
 
           if (!that.multiple) {
-            that.$button.focus();
+            that.$button.trigger('focus');
           } else if (that.options.liveSearch) {
-            that.$searchbox.focus();
+            that.$searchbox.trigger('focus');
           }
 
           // Trigger select 'change'
@@ -1212,9 +1212,9 @@
           e.preventDefault();
           e.stopPropagation();
           if (that.options.liveSearch && !$(e.target).hasClass('close')) {
-            that.$searchbox.focus();
+            that.$searchbox.trigger('focus');
           } else {
-            that.$button.focus();
+            that.$button.trigger('focus');
           }
         }
       });
@@ -1223,9 +1223,9 @@
         e.preventDefault();
         e.stopPropagation();
         if (that.options.liveSearch) {
-          that.$searchbox.focus();
+          that.$searchbox.trigger('focus');
         } else {
-          that.$button.focus();
+          that.$button.trigger('focus');
         }
       });
 
@@ -1239,9 +1239,9 @@
 
       this.$menu.on('click', '.actions-btn', function (e) {
         if (that.options.liveSearch) {
-          that.$searchbox.focus();
+          that.$searchbox.trigger('focus');
         } else {
-          that.$button.focus();
+          that.$button.trigger('focus');
         }
 
         e.preventDefault();
@@ -1272,7 +1272,7 @@
         }
         if (!that.multiple) that.$menuInner.find('.selected').addClass('active');
         setTimeout(function () {
-          that.$searchbox.focus();
+          that.$searchbox.trigger('focus');
         }, 10);
       });
 
@@ -1331,8 +1331,8 @@
         }
 
         that.$lis.filter('.active').removeClass('active');
-        if (that.$searchbox.val()) that.$lis.not('.hidden, .divider, .dropdown-header').eq(0).addClass('active').children('a').focus();
-        $(this).focus();
+        if (that.$searchbox.val()) that.$lis.not('.hidden, .divider, .dropdown-header').eq(0).addClass('active').children('a').trigger('focus');
+        $(this).trigger('focus');
       });
     },
 
@@ -1477,7 +1477,7 @@
         } else {
           that.$button.trigger('click');
         }
-        that.$searchbox.focus();
+        that.$searchbox.trigger('focus');
       }
 
       if (that.options.liveSearch) {
@@ -1485,7 +1485,7 @@
           e.preventDefault();
           that.$menu.parent().removeClass('open');
           if (that.options.container) that.$newElement.removeClass('open');
-          that.$button.focus();
+          that.$button.trigger('focus');
         }
         // $items contains li elements when liveSearch is enabled
         $items = $('[role=menu] li' + selector, $parent);
@@ -1543,12 +1543,12 @@
         $this.data('prevIndex', index);
 
         if (!that.options.liveSearch) {
-          $items.eq(index).children('a').focus();
+          $items.eq(index).children('a').trigger('focus');
         } else {
           e.preventDefault();
           if (!$this.hasClass('dropdown-toggle')) {
-            $items.removeClass('active').eq(index).addClass('active').children('a').focus();
-            $this.focus();
+            $items.removeClass('active').eq(index).addClass('active').children('a').trigger('focus');
+            $this.trigger('focus');
           }
         }
 
@@ -1579,7 +1579,7 @@
           if (count > keyIndex.length) count = 1;
         }
 
-        $items.eq(keyIndex[count - 1]).children('a').focus();
+        $items.eq(keyIndex[count - 1]).children('a').trigger('focus');
       }
 
       // Select focused option if "Enter", "Spacebar" or "Tab" (when selectOnTab is true) are pressed inside the menu.
@@ -1589,14 +1589,14 @@
           var elem = $(':focus');
           elem.click();
           // Bring back focus for multiselects
-          elem.focus();
+          elem.trigger('focus');
           // Prevent screen from scrolling if the user hit the spacebar
           e.preventDefault();
           // Fixes spacebar selection of dropdown items in FF & IE
           $(document).data('spaceSelect', true);
         } else if (!/(32)/.test(e.keyCode.toString(10))) {
           that.$menuInner.find('.active a').click();
-          $this.focus();
+          $this.trigger('focus');
         }
         $(document).data('keycount', 0);
       }
@@ -1604,7 +1604,7 @@
       if ((/(^9$|27)/.test(e.keyCode.toString(10)) && isActive && (that.multiple || that.options.liveSearch)) || (/(27)/.test(e.keyCode.toString(10)) && !isActive)) {
         that.$menu.parent().removeClass('open');
         if (that.options.container) that.$newElement.removeClass('open');
-        that.$button.focus();
+        that.$button.trigger('focus');
       }
     },
 
