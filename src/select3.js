@@ -1163,7 +1163,7 @@ class Select3 {
         });
 
         this.$menu.on('click', '.popover-title .close', () => {
-            this.$button.on('click', );
+            this.$button.trigger('click');
         });
 
         this.$searchbox.on('click', (e) => {
@@ -1541,7 +1541,7 @@ class Select3 {
             if (!/(32)/.test(e.keyCode.toString(10))) e.preventDefault();
             if (!_this.options.liveSearch) {
                 let elem = $(':focus');
-                elem.on('click', );
+                elem.trigger('click');
                 // Bring back focus for multiselects
                 elem.trigger('focus');
                 // Prevent screen from scrolling if the user hit the spacebar
@@ -1549,7 +1549,7 @@ class Select3 {
                 // Fixes spacebar selection of dropdown items in FF & IE
                 $(document).data('spaceSelect', true);
             } else if (!/(32)/.test(e.keyCode.toString(10))) {
-                _this.$menuInner.find('.active a').on('click', );
+                _this.$menuInner.find('.active a').trigger('click');
                 $target.trigger('focus');
             }
             $(document).data('keycount', 0);
